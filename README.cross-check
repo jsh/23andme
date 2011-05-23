@@ -1,0 +1,38 @@
+Several SNPs have more than one rsid probing the same position on the same chromosome. Concordance of the results from these probes permit an estimate of error rates.
+
+For my own data at these sites, only about half report nucleotide composition. For all but four of these, all probes give the same answer.
+
+Of these discordant four, listed below, two appear to probe opposite strands, one probe reporting CC, the other, GG. The other two sites give incompatible results.
+
+From this, I estimate that 1-3% of the reported SNP results are incorrect.
+
+Is this consistent with other data?
+
+The ode to do this analysis can be downloaded from GitHub, at git@github.com:jsh/23andme.git
+
+Summary from my own raw data follows:
+
+
+rsid           chromosome     position       genotype       
+------------------------------------------------------------
+i4000438       15             70427442       CC             
+i5004858       15             70427442       GG             
+
+rs1135840      22             40852557       CG             
+i4001403       22             40852557       GG             
+
+i4001413       22             40855078       CC             
+rs61736512     22             40855078       GG             
+
+rs28671493     MT             16184          C              
+i4001306       MT             16184          A              
+
+
+#snps = 966983
+indeterminate = 16694
+insertions = 850
+deletions = 221
+
+duplicates = 402
+match = 221
+disagree = 4
