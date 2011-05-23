@@ -1,0 +1,92 @@
+#!/usr/bin/perl -w
+# check that multiple SNPs from one location give same results.
+
+my (@line, @oldline, $bases, $oldbases);
+my ($nlines, $ndups) = (0,0);
+my ($nind, $indeterminate) = (0,0); # '-' and '--'
+my ($pos, $oldpos) = (0,0); 	# positions on chromosome
+my ($nins, $ndel, $insertions, $deletions) = (0,0,0,0); # insertions and deletions.
+my ($npass, $nfail) = (0,0);	# concordances
+
+# diagnose duplicates
+sub diagnose {
+
+	if ($bases =~ /-/ || $oldbases =~ /-/) {
+		$nind++;
+		warn "UNTESTED\n";
+	} elsif ($bases =~ /I/ || $oldbases =~ /I/) {
+		$nins++;
+		warn "INSERTION\n";
+	} elsif ($bases =~ /D/ || $oldbases =~ /D/) {
+		$ndel++;
+		warn "DELETION\n";
+	} elsif ($bases eq $oldbases) {
+		$npass++;
+		warn "PASS\n";
+	} else {
+		print_header() if ($nfail == 0);
+		$nfail++; 
+		warn "FAIL\n";
+		printf "%-15s%-15s%-15s%-15s\n",
+			$oldline[0], $oldline[1], $oldline[2], $oldline[3];
+		printf "%-15s%-15s%-15s%-15s\n",
+			$line[0], $line[1], $line[2], $line[3];
+		print "\n";
+	}
+	if ($bases !~ /(A|C|G|T)/) {
+		# don't replace, in case there's a long series
+		$bases = $oldbases;
+		@line = @oldline;
+	}
+}
+
+# print header for mismatches
+sub print_header {
+	printf "\n%-15s%-15s%-15s%-15s\n", "rsid", "chromosome", "position", "genotype";
+	printf "%s\n", '-' x 60;
+}
+
+# check usage
+(@ARGV > 0 ) or die "usage: $0 snpdata [snpdata ...]";
+
+# now analyze the data
+while (<>) {
+	next unless /\S/;
+	next if /\s*#/;
+	$nlines++; 
+	@line = split;
+	$pos = $line[2];
+        $bases = $line[3];
+	if ($bases =~ /-/) {
+		$indeterminate++;
+	} elsif ($bases =~ /I/) {
+		$insertions++;
+	} elsif ($bases =~ /D/) {
+		$deletions++;
+	}
+
+	if (($pos - $oldpos) == 0) {
+	  $ndups++;
+          diagnose();
+	} 
+	@oldline = @line;
+	$oldpos = $pos;
+	$oldbases = $bases;
+}
+
+print "\n";
+print "#snps = $nlines\n";
+print "indeterminate = $indeterminate", "\n";
+print "insertions = $insertions", "\n";
+print "deletions = $deletions", "\n";
+print "\n";
+
+print "duplicates = $ndups\n";
+print "match = $npass\n";
+print "disagree = $nfail\n";
+
+#print "nind= $nind, indeterminate = $indeterminate", "\n";
+#print "nins= $nins, insertions = $insertions", "\n";
+#print "ndel= $ndel, deletions = $deletions", "\n";
+#print '%ind = ', $indeterminate/$nlines, "\n";
+#print '%dups = ', $ndups/$nlines, "\n";
